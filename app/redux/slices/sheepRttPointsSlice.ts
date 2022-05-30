@@ -1,6 +1,7 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from '../store';
 import {Feature, FeatureCollection, Point} from "geojson";
+import { isValid } from 'date-fns';
 
 const isValidRTTMeasurement = (point: Feature<Point>): boolean => {
     const rssi = point?.properties?.rssi
@@ -47,3 +48,14 @@ export const {storeSheepRttPoint, setSheepRttPoints, removeSheepRttPoints} = she
 export default sheepRttPoints.reducer;
 
 export const selectSheepRttPoints = (state: RootState) => state.sheepRttPoints.value;
+
+export const selectValidRttPoints = (state: RootState) => {
+    const oldPoints = state.sheepRttPoints.value;
+    const filteredPoints = oldPoints.features.filter(point => isValidRTTMeasurement(point));
+    return ({
+        type: "FeatureCollection",
+        features: filteredPoints
+    })
+}
+
+

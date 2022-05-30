@@ -2,14 +2,14 @@ import React from 'react'
 import {readFile, writeFile} from 'fs'
 import {format} from 'date-fns'
 import {useDispatch, useSelector} from 'react-redux'
-import {selectSheepRttPoints, setSheepRttPoints} from '@slices/sheepRttPointsSlice'
+import {selectSheepRttPoints, selectValidRttPoints, setSheepRttPoints} from '@slices/sheepRttPointsSlice'
 import {FeatureCollection, Point} from 'geojson'
 import {Button} from '@material-ui/core'
 
 const SheepPointSaveLoad = () => {
 
     const dispatch = useDispatch()
-    const sheepRttPoints = useSelector(selectSheepRttPoints)
+    const sheepRttPoints = useSelector(selectValidRttPoints)
 
     function saveSheepRttPoints() {
         const {dialog} = require('electron').remote
