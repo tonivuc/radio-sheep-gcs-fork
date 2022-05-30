@@ -2,21 +2,35 @@ import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from '../store';
 import {Feature, FeatureCollection, Point} from "geojson";
 
+const isValidRTTMeasurement = (point: Feature<Point>): boolean => {
+    const rssi = point?.properties?.rssi
+    if (typeof rssi == 'number' && rssi != 0) {
+        return true;
+    }
+    return false;
+  };
+
 const sheepRttPoints = createSlice({
     name: 'sheepRttPoints',
     initialState: {value: <FeatureCollection<Point>> {type: "FeatureCollection", features: []}},
     reducers: {
         storeSheepRttPoint: (state, action: PayloadAction<Feature<Point>>) => {
-            const index = state.value.features.findIndex(({id}) => id === action.payload.id)
-            const features = state.value.features.slice();
-            if (index === -1) {
-                features.push(action.payload)
-            } else {
-                features[index] = action.payload
+            if (isValidRTTMeasurement(action.payload)) {
+                const index = state.value.features.findIndex(({id}) => id === action.payload.id)
+                const features = state.value.features.slice();
+                if (index === -1) {
+                    features.push(action.payload)
+                } else {
+                    features[index] = action.payload
+                }
+                state.value = {
+                    type: 'FeatureCollection',
+                    features,
+                }
             }
-            state.value = {
-                type: 'FeatureCollection',
-                features,
+            else {
+                //Do nothin brah
+                console.log("Corrupted RTT measurement received, not storing.");
             }
         },
         setSheepRttPoints: (state, action: PayloadAction<FeatureCollection<Point>>) => {
