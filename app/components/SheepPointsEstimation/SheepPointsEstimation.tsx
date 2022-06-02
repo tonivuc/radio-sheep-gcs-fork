@@ -83,6 +83,7 @@ function particleMean(pointsPerSheep: { [id: string]: Feature<Point>[] }): Featu
 }
 
 function nextErrorRadius(oldErrorRadius: number): number {
+    return oldErrorRadius+1;
     if (oldErrorRadius <= 8) {
         return oldErrorRadius * 2 || 1;
     }
