@@ -129,6 +129,7 @@ function intersectionMean(pointsPerSheep: {[id: string]: Feature<Point>[]}): Fea
 
         const meanPoint = turf.centerMean(points) as Feature<Point>
         meanPoint.id = sheepId
+        console.log("Sheep ID "+sheepId+"has coordinates "+JSON.stringify(meanPoint.geometry))
 
         return  meanPoint
     })
