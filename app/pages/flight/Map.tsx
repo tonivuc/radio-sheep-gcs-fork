@@ -20,6 +20,7 @@ import {topo4, topo4graatone} from "@/pages/flight/mapStyles"
 import {selectEstimatedSheepPoints} from "@slices/estimatedSheepPointsSlice"
 import {selectActualSheepPoints} from "@slices/actualSheepPointsSlice"
 import MapboxGLButtonControl from '@/components/CustomControls/MapboxGLButtonControl'
+import {selectClearMap} from "@slices/clearMapSlice"
 
 const SOURCES = {
     WAYPOINTS: 'waypoints',
@@ -51,9 +52,6 @@ export default function Map({features = []}: Props) {
 
     const dispatch = useDispatch()
     const mapContainerRef = useRef(null);
-
-    const [sheepRTTCounter, setSheepRTTCounter] = useState(0);
-
     const completedPoints = useSelector(selectCompletedPoints)
     const droneStatus: DroneStatus = useSelector(selectDroneStatus)
     const flightParameters: FlightParameters = useSelector(selectFlightParameters)
@@ -61,6 +59,7 @@ export default function Map({features = []}: Props) {
     const selectedSheepRttPoint: number = useSelector(selectSelectedSheepRttPoint)
     const estimatedSheepPoints: FeatureCollection<Point> = useSelector(selectEstimatedSheepPoints)
     const actualSheepPoints: FeatureCollection<Point> = useSelector(selectActualSheepPoints)
+    const clearMap: boolean = useSelector(selectClearMap)
 
     const mapParameters: MapParameters = useSelector(selectMapParameters)
 
@@ -241,13 +240,7 @@ export default function Map({features = []}: Props) {
     }, [mapParameters.grayTone])
 
     useEffect(() => {
-        if (sheepRTTCounter >= 5 || sheepRTTCounter == 0) {
-            drawFeatures(features);
-            setSheepRTTCounter(1);
-        }   
-        else {
-            setSheepRTTCounter(sheepRTTCounter + 1);
-        }
+        drawFeatures(features)
     }, [features])
 
     useEffect(() => {
@@ -387,7 +380,7 @@ export default function Map({features = []}: Props) {
                 'line-width': 1,
             },
         })
-    }, [selectedSheepRttPoint])
+    }, [clearMap, selectedSheepRttPoint])
 
     useEffect(() => {
         if (map?.getLayer(LAYERS.ESTIMATED_SHEEP_POINTS)) map?.removeLayer(LAYERS.ESTIMATED_SHEEP_POINTS)
