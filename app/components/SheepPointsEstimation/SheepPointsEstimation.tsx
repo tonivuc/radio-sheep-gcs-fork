@@ -82,6 +82,15 @@ function particleMean(pointsPerSheep: { [id: string]: Feature<Point>[] }): Featu
     })
 }
 
+function nextErrorRadius(oldErrorRadius: number): number {
+    if (oldErrorRadius <= 4) {
+        return oldErrorRadius * 2 || 1;
+    }
+    else {
+        return oldErrorRadius + 2;
+    }
+}
+
 function intersectionMean(pointsPerSheep: {[id: string]: Feature<Point>[]}): Feature<Point>[] {
 
     return Object.keys(pointsPerSheep).map((sheepId: string) => {
@@ -101,7 +110,7 @@ function intersectionMean(pointsPerSheep: {[id: string]: Feature<Point>[]}): Fea
                 currentIntersection = turf.intersect(currentIntersection, currentCircle) as Feature<Polygon> | null
 
                 if (currentIntersection === null) {
-                    errorRadius = errorRadius * 2 || 1
+                    errorRadius = nextErrorRadius(errorRadius)
                     console.log("Increasing error radius: ", errorRadius)
                     break
                 }
@@ -112,12 +121,14 @@ function intersectionMean(pointsPerSheep: {[id: string]: Feature<Point>[]}): Fea
             }
         }
 
+        console.log("sheepID: "+sheepId)
         console.log(JSON.stringify(completeIntersection))
 
         const points = turf.explode(completeIntersection)
 
         const meanPoint = turf.centerMean(points) as Feature<Point>
         meanPoint.id = sheepId
+        console.log("Sheep ID "+sheepId+"has coordinates "+JSON.stringify(meanPoint.geometry))
 
         return  meanPoint
     })
