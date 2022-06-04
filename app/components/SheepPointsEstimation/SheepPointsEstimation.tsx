@@ -12,7 +12,7 @@ import {
 } from "@slices/estimatedSheepPointsSlice"
 import {selectActualSheepPoints} from '@slices/actualSheepPointsSlice'
 
-const NUMBER_OF_PARTICLES = 360
+const NUMBER_OF_PARTICLES = 320
 
 function particleMean(pointsPerSheep: { [id: string]: Feature<Point>[] }): Feature<Point>[] {
     return Object.keys(pointsPerSheep).map((sheepId: string) => {
