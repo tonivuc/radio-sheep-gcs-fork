@@ -3,12 +3,24 @@ import {RootState} from '../store';
 import {Feature, FeatureCollection, Point} from "geojson";
 
 const isValidRTTMeasurement = (point: Feature<Point>): boolean => {
+    return hasValidRSSI(point) && hasValidCoordinates(point)
+};
+
+const hasValidRSSI = (point: Feature<Point>): boolean => {
     const rssi = point?.properties?.rssi
     if (typeof rssi == 'number' && rssi != 0) {
         return true;
     }
     return false;
-  };
+}
+
+const hasValidCoordinates = (point: Feature<Point>): boolean => {
+    const coordinates = point?.geometry?.coordinates
+    if (coordinates[0] !== 0 && coordinates[1] !== 0) {
+        return true;
+    }
+    return false;
+}
 
 const sheepRttPoints = createSlice({
     name: 'sheepRttPoints',
