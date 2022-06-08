@@ -12,7 +12,7 @@ import {
 } from "@slices/estimatedSheepPointsSlice"
 import {selectActualSheepPoints} from '@slices/actualSheepPointsSlice'
 
-const NUMBER_OF_PARTICLES = 360
+const NUMBER_OF_PARTICLES = 320
 
 function particleMean(pointsPerSheep: { [id: string]: Feature<Point>[] }): Feature<Point>[] {
     return Object.keys(pointsPerSheep).map((sheepId: string) => {
@@ -102,6 +102,8 @@ function intersectionMean(pointsPerSheep: {[id: string]: Feature<Point>[]}): Fea
 
                 if (currentIntersection === null) {
                     errorRadius = errorRadius * 2 || 1
+                    console.log("No intersection cuz of")
+                    console.log(JSON.stringify(currentCircle))
                     console.log("Increasing error radius: ", errorRadius)
                     break
                 }
@@ -113,11 +115,13 @@ function intersectionMean(pointsPerSheep: {[id: string]: Feature<Point>[]}): Fea
         }
 
         console.log(JSON.stringify(completeIntersection))
+        console.log("SheepID: "+sheepId)
 
         const points = turf.explode(completeIntersection)
 
         const meanPoint = turf.centerMean(points) as Feature<Point>
         meanPoint.id = sheepId
+        console.log("SheepID: "+sheepId+ "meanPoint: "+JSON.stringify(meanPoint))
 
         return  meanPoint
     })
