@@ -123,6 +123,7 @@ function intersectionMean(pointsPerSheep: {[id: string]: Feature<Point>[]}): Fea
 
         console.log("sheepID: "+sheepId)
         console.log(JSON.stringify(completeIntersection))
+        console.log("Area of intersection: "+turf.area(completeIntersection))
 
         const points = turf.explode(completeIntersection)
 
