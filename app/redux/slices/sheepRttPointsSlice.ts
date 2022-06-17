@@ -2,7 +2,7 @@ import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from '../store';
 import {Feature, FeatureCollection, Point} from "geojson";
 
-const USE_ONLY_EVERY_10TH_MEASUREMENT = false;
+const USE_ONLY_EVERY_10TH_MEASUREMENT = true;
 
 const sheepRttPoints = createSlice({
     name: 'sheepRttPoints',
@@ -25,12 +25,12 @@ const sheepRttPoints = createSlice({
             if (USE_ONLY_EVERY_10TH_MEASUREMENT) {
                 const allRTTPoints = action.payload
                 const every10thRTTMeasurement = onlyEver10thMeasurement(allRTTPoints)
+                state.value = {type: "FeatureCollection", features: every10thRTTMeasurement};
             }
             else {
-                console.log(onlyEver10thMeasurement(action.payload));
+                
                 state.value = action.payload;
             }
-            
         },
         removeSheepRttPoints: (state) => {
             state.value = {type: "FeatureCollection", features: []};
@@ -39,9 +39,7 @@ const sheepRttPoints = createSlice({
 });
 
 function onlyEver10thMeasurement(allRTTPoints : FeatureCollection<Point>) {
-    //const filteredPoints:  FeatureCollection<Point> = null;
     const rttPointsSplitIntoArrays = splitIntoArrayForEachTagID(allRTTPoints);
-    console.log(rttPointsSplitIntoArrays)
     return getEvery10thMeasurement(rttPointsSplitIntoArrays);
 }
 
@@ -63,21 +61,16 @@ function getEvery10thMeasurement(rttPointsInArrays : Map<number, Feature<Point>[
     const newArray: Feature<Point>[] = [];
     rttPointsInArrays.forEach((keyValue) => {
         let counter = 0;
-        keyValue.forEach((feature, tagId) => {
-            if (counter === 0) {
+        keyValue.forEach((feature) => {
+            if (counter % 10 === 0) { //For every 10th measurement
                 newArray.push(feature);
-                counter++;
             }
-            else if (counter === 9) {
-                counter = 0;
-            }
-            else {
-                counter++;
-            }
+            counter++;
         })
     })
     return newArray;
 }
+
 
 export const {storeSheepRttPoint, setSheepRttPoints, removeSheepRttPoints} = sheepRttPoints.actions;
 
