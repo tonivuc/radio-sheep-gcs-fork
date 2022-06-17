@@ -2,7 +2,7 @@ import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from '../store';
 import {Feature, FeatureCollection, Point} from "geojson";
 
-const USE_ONLY_EVERY_10TH_MEASUREMENT = true;
+const USE_ONLY_EVERY_10TH_MEASUREMENT = false;
 
 const sheepRttPoints = createSlice({
     name: 'sheepRttPoints',
@@ -24,8 +24,7 @@ const sheepRttPoints = createSlice({
         setSheepRttPoints: (state, action: PayloadAction<FeatureCollection<Point>>) => {
             if (USE_ONLY_EVERY_10TH_MEASUREMENT) {
                 const allRTTPoints = action.payload
-                const every10thRTTMeasurement = onlyEver10thMeasurement(allRTTPoints)
-                state.value = {type: "FeatureCollection", features: every10thRTTMeasurement};
+                state.value = {type: "FeatureCollection", features: onlyEvery10thMeasurement(allRTTPoints)};
             }
             else {
                 
@@ -38,23 +37,24 @@ const sheepRttPoints = createSlice({
     },
 });
 
-function onlyEver10thMeasurement(allRTTPoints : FeatureCollection<Point>) {
+function onlyEvery10thMeasurement(allRTTPoints : FeatureCollection<Point>) {
     const rttPointsSplitIntoArrays = splitIntoArrayForEachTagID(allRTTPoints);
     return getEvery10thMeasurement(rttPointsSplitIntoArrays);
 }
 
 function splitIntoArrayForEachTagID(allRTTPoints : FeatureCollection<Point>): Map<number, Feature<Point>[]> {
     const filteredPoints:  Feature<Point>[] = allRTTPoints.features;
-    const rttPointsSortedBySheepId = new Map<number, Feature<Point>[]>();
+    const mappingOfSheepIDsAndRTTPoints = new Map<number, Feature<Point>[]>();
     filteredPoints.forEach((point) => {
-        if (rttPointsSortedBySheepId.has(point?.properties?.tid)) {
-            rttPointsSortedBySheepId.get(point?.properties?.tid)!.push(point)
+        const sheepTagId = point?.properties?.tid;
+        if (mappingOfSheepIDsAndRTTPoints.has(sheepTagId)) {
+            mappingOfSheepIDsAndRTTPoints.get(sheepTagId)!.push(point)
         }
         else {
-            rttPointsSortedBySheepId.set(point?.properties?.tid,[point])
+            mappingOfSheepIDsAndRTTPoints.set(sheepTagId,[point])
         }
     })
-    return rttPointsSortedBySheepId;
+    return mappingOfSheepIDsAndRTTPoints;
 }
 
 function getEvery10thMeasurement(rttPointsInArrays : Map<number, Feature<Point>[]>) {
@@ -68,7 +68,7 @@ function getEvery10thMeasurement(rttPointsInArrays : Map<number, Feature<Point>[
             counter++;
         })
     })
-    return newArray.sort(sortById);
+    return newArray.sort(sortById); //Make them the same order as they originally were
 }
 
 function sortById(a: Feature<Point>, b: Feature<Point>) { 
