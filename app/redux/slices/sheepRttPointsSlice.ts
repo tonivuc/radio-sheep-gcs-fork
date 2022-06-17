@@ -21,6 +21,7 @@ const hasValidCoordinates = (point: Feature<Point>): boolean => {
     }
     return false;
 }
+const USE_ONLY_EVERY_10TH_MEASUREMENT = false;
 
 const sheepRttPoints = createSlice({
     name: 'sheepRttPoints',
@@ -46,13 +47,58 @@ const sheepRttPoints = createSlice({
             }
         },
         setSheepRttPoints: (state, action: PayloadAction<FeatureCollection<Point>>) => {
-            state.value = action.payload;
+            if (USE_ONLY_EVERY_10TH_MEASUREMENT) {
+                const allRTTPoints = action.payload
+                state.value = {type: "FeatureCollection", features: onlyEvery10thMeasurement(allRTTPoints)};
+            }
+            else {
+                
+                state.value = action.payload;
+            }
         },
         removeSheepRttPoints: (state) => {
             state.value = {type: "FeatureCollection", features: []};
         },
     },
 });
+
+function onlyEvery10thMeasurement(allRTTPoints : FeatureCollection<Point>) {
+    const rttPointsSplitIntoArrays = splitIntoArrayForEachTagID(allRTTPoints);
+    return getEvery10thMeasurement(rttPointsSplitIntoArrays);
+}
+
+function splitIntoArrayForEachTagID(allRTTPoints : FeatureCollection<Point>): Map<number, Feature<Point>[]> {
+    const filteredPoints:  Feature<Point>[] = allRTTPoints.features;
+    const mappingOfSheepIDsAndRTTPoints = new Map<number, Feature<Point>[]>();
+    filteredPoints.forEach((point) => {
+        const sheepTagId = point?.properties?.tid;
+        if (mappingOfSheepIDsAndRTTPoints.has(sheepTagId)) {
+            mappingOfSheepIDsAndRTTPoints.get(sheepTagId)!.push(point)
+        }
+        else {
+            mappingOfSheepIDsAndRTTPoints.set(sheepTagId,[point])
+        }
+    })
+    return mappingOfSheepIDsAndRTTPoints;
+}
+
+function getEvery10thMeasurement(rttPointsInArrays : Map<number, Feature<Point>[]>) {
+    const newArray: Feature<Point>[] = [];
+    rttPointsInArrays.forEach((keyValue) => {
+        let counter = 0;
+        keyValue.forEach((feature) => {
+            if (counter % 10 === 0) { //For every 10th measurement
+                newArray.push(feature);
+            }
+            counter++;
+        })
+    })
+    return newArray.sort(sortById); //Make them the same order as they originally were
+}
+
+function sortById(a: Feature<Point>, b: Feature<Point>) { 
+    return Number(a?.id) - Number(b?.id);
+}
 
 export const {storeSheepRttPoint, setSheepRttPoints, removeSheepRttPoints} = sheepRttPoints.actions;
 
