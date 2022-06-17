@@ -68,9 +68,12 @@ function getEvery10thMeasurement(rttPointsInArrays : Map<number, Feature<Point>[
             counter++;
         })
     })
-    return newArray;
+    return newArray.sort(sortById);
 }
 
+function sortById(a: Feature<Point>, b: Feature<Point>) { 
+    return Number(a?.id) - Number(b?.id);
+}
 
 export const {storeSheepRttPoint, setSheepRttPoints, removeSheepRttPoints} = sheepRttPoints.actions;
 
